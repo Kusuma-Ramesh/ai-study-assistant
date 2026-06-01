@@ -1,11 +1,11 @@
-AI Study Assistant
+# AI Study Assistant
 
-Overview:
+# Overview:
 
 AI Study Assistant is a smart learning platform designed to simplify complex topics using Artificial Intelligence. The system leverages the Groq API with the LLaMA 3.1 model to provide instant explanations, generate key concepts, create visual mindmaps, analyze study materials, and recommend educational resources.
 The platform helps students learn faster by combining text-based explanations, visual learning, document analysis, and AI-powered assistance in a single interface.
 
-# Features:
+## Features:
 
 - AI-powered topic explanations
 - Interactive chatbot using LLaMA 3.1
@@ -19,20 +19,20 @@ The platform helps students learn faster by combining text-based explanations, v
 - Voice input support
 
 # Technologies Used:
-# Backend:
+## Backend:
 
 - Python
 - Django
 - Groq API
 - SQLite
 
-# Frontend:
+## Frontend:
 
 - HTML5
 - CSS3
 - JavaScript
 
-# Libraries:
+## Libraries:
 
 - requests
 - PyPDF2
@@ -40,7 +40,7 @@ The platform helps students learn faster by combining text-based explanations, v
 - Pillow
 - Mermaid.js
 
-# Project Structure:
+## Project Structure:
 
 ```text
 ai-study-assistant/
@@ -66,7 +66,7 @@ ai-study-assistant/
 └── README.md
 ```
 
-# How It Works:
+## How It Works:
 
 1. User enters a topic or question.
 2. Django backend receives the request.
@@ -77,25 +77,25 @@ ai-study-assistant/
 
 ## Core Functionalities:
 
-# AI Chatbot: Provides conversational responses and academic guidance using Large Language Models.
+### AI Chatbot: Provides conversational responses and academic guidance using Large Language Models.
 
-# Study Material Analysis: Extracts information from uploaded PDFs and images.
+### Study Material Analysis: Extracts information from uploaded PDFs and images.
 
-# Visual Mindmaps: Generates flowcharts and visual learning structures using Mermaid.js.
+### Visual Mindmaps: Generates flowcharts and visual learning structures using Mermaid.js.
 
-# Educational Resources: Recommends learning materials and educational content related to the searched topic.
+### Educational Resources: Recommends learning materials and educational content related to the searched topic.
 
-# Voice Input: Allows users to interact using speech recognition.
+### Voice Input: Allows users to interact using speech recognition.
 
-# Database Design:
-# ChatMessage stores:
+## Database Design:
+### ChatMessage stores:
 
 - User information
 - User questions
 - AI responses
 - Timestamps
 
-# Installation:
+### Installation:
 Clone the repository:
 
 ```bash
@@ -120,7 +120,7 @@ Start server:
 python manage.py runserver
 ```
 
-# Future Enhancements:
+### Future Enhancements:
 
 - AI-generated quizzes
 - Personalized learning paths
@@ -129,7 +129,7 @@ python manage.py runserver
 - Advanced analytics dashboard
 - Multi-language support
 
-# Learning Outcomes:
+### Learning Outcomes:
 
 - Django Web Development
 - API Integration
@@ -139,7 +139,7 @@ python manage.py runserver
 - AI Application Development
 - Full Stack Development
 
-# Author:
+## Author:
 
 Kusuma R
 
