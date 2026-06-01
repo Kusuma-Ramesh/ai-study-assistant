@@ -1,6 +1,6 @@
 AI Study Assistant
 
-Overview
+Overview:
 
 AI Study Assistant is a smart learning platform designed to simplify complex topics using Artificial Intelligence. The system leverages the Groq API with the LLaMA 3.1 model to provide instant explanations, generate key concepts, create visual mindmaps, analyze study materials, and recommend educational resources.
 The platform helps students learn faster by combining text-based explanations, visual learning, document analysis, and AI-powered assistance in a single interface.
