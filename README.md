@@ -75,7 +75,7 @@ ai-study-assistant/
 5. AI-generated response is returned.
 6. Results are displayed through the web interface.
 
-# Core Functionalities:
+## Core Functionalities:
 
 # AI Chatbot: Provides conversational responses and academic guidance using Large Language Models.
 
