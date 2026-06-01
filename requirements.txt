@@ -1,0 +1,4 @@
+# Required Python packages for running this project
+
+django        # Web framework
+requests      # For calling Hugging Face API

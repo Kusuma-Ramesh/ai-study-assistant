@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - AI Study Assistant{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>👋 Hello, {{ user.username }}!</h1>
+    <p>Search any topic to get a simple explanation, key points, and a mind map.</p>
+</div>
+
+<!-- Topic Search Card -->
+<div class="card search-card">
+    <h2>🔍 Topic Search</h2>
+    <div class="search-box">
+        <input type="text" id="topicInput" placeholder="Enter a topic (e.g. Photosynthesis, Python, Gravity...)" />
+        <button onclick="searchTopic()" class="btn btn-primary">Search</button>
+    </div>
+    <div id="searchLoading" class="loading" style="display:none;">⏳ Fetching from AI... please wait...</div>
+</div>
+
+<!-- Results Section (hidden until search is done) -->
+<div id="searchResults" style="display:none;">
+
+    <!-- Explanation Card -->
+    <div class="card result-card">
+        <h3>📖 Simple Explanation</h3>
+        <p id="explanationText"></p>
+    </div>
+
+    <!-- Key Points Card -->
+    <div class="card result-card">
+        <h3>✅ Key Points</h3>
+        <ul id="keyPointsList"></ul>
+    </div>
+
+    <!-- Visual Flowchart Card -->
+    <div class="card result-card">
+        <h3>⚡ Visual Flowchart</h3>
+        <div id="flowchartContainer" class="mermaid-container"></div>
+    </div>
+
+    <!-- Visual Mindmap Card -->
+    <div class="card result-card">
+        <h3>🗺️ Visual Mindmap</h3>
+        <div id="mindmapContainer" class="mermaid-container"></div>
+    </div>
+
+</div>
+
+<!-- Quick link to Chat -->
+<div class="card cta-card">
+    <h3>💬 Want to ask more questions?</h3>
+    <p>Go to the chatbot and have a full conversation with the AI!</p>
+    <a href="/chat/" class="btn btn-secondary">Open Chatbot →</a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function searchTopic() {
+        const topic = document.getElementById('topicInput').value.trim();
+        if (!topic) {
+            alert('Please enter a topic first!');
+            return;
+        }
+
+        document.getElementById('searchLoading').style.display = 'block';
+        document.getElementById('searchResults').style.display = 'none';
+
+        fetch('/api/search/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ topic: topic })
+        })
+        .then(response => response.json())
+        .then(async data => {
+            document.getElementById('searchLoading').style.display = 'none';
+
+            // 1. Text Content
+            document.getElementById('explanationText').textContent = data.explanation || 'No explanation found.';
+            
+            const list = document.getElementById('keyPointsList');
+            list.innerHTML = '';
+            (data.key_points || []).forEach(point => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                list.appendChild(li);
+            });
+
+            // 2. Mermaid Diagrams
+            const flowContainer = document.getElementById('flowchartContainer');
+            const mindContainer = document.getElementById('mindmapContainer');
+
+            // Clear old diagrams
+            flowContainer.innerHTML = '';
+            mindContainer.innerHTML = '';
+
+            // Set new syntax
+            flowContainer.textContent = data.flowchart || '';
+            mindContainer.textContent = data.mindmap || '';
+
+            // Important: Remove 'data-processed' so Mermaid rerenders
+            flowContainer.removeAttribute('data-processed');
+            mindContainer.removeAttribute('data-processed');
+
+            // Show results before rendering mermaid
+            document.getElementById('searchResults').style.display = 'block';
+
+            // Helper to clean common AI mistakes in Mermaid code
+            function sanitizeMermaid(code, fallbackType = 'graph TD') {
+                if (!code || code.length < 5) return `${fallbackType}\n  A["${topic}"]`;
+                
+                let cleaned = code.trim()
+                    .replace(/^\d+:\s*/gm, '') // Remove line numbers
+                    .replace(/\\n/g, '\n')      // Fix escaped newlines
+                    .replace(/[()]/g, '');      // Remove parentheses from labels (they break Mermaid)
+
+                // Ensure it starts with the correct header
+                if (!cleaned.toLowerCase().startsWith('graph')) {
+                    cleaned = `${fallbackType}\n` + cleaned;
+                }
+                return cleaned;
+            }
+
+            // Give the browser a tiny moment to draw the text, then render Mermaid
+            setTimeout(async () => {
+                const cleanFlow = sanitizeMermaid(data.flowchart, 'graph TD');
+                const cleanMind = sanitizeMermaid(data.mindmap, 'graph LR');
+
+                flowContainer.textContent = cleanFlow;
+                mindContainer.textContent = cleanMind;
+
+                try {
+                    // Re-initialize mermaid to ensure fresh state
+                    mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' });
+                    await mermaid.run({
+                        nodes: [flowContainer, mindContainer],
+                        suppressErrors: true
+                    });
+                } catch (err) {
+                    console.error("Mermaid error:", err);
+                    // If it still fails, just show the root node
+                    flowContainer.innerHTML = `graph TD\nA["${topic}"]`;
+                    mindContainer.innerHTML = `graph LR\nA["${topic}"]`;
+                    await mermaid.run({ nodes: [flowContainer, mindContainer] });
+                }
+            }, 200);
+        })
+        .catch(error => {
+            document.getElementById('searchLoading').style.display = 'none';
+            alert('Error: ' + error.message);
+        });
+    }
+
+    document.getElementById('topicInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchTopic();
+    });
+</script>
+{% endblock %}

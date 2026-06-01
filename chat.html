@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Chatbot - AI Study Assistant{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>💬 AI Chatbot</h2>
+        <p>Ask me anything! I'll give you short, student-friendly answers.</p>
+    </div>
+
+    <!-- Chat message display area -->
+    <div class="chat-box" id="chatBox">
+
+        <!-- Load old messages from database -->
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="message user-message">
+                    <span class="msg-label">You</span>
+                    <p>{{ msg.user_message }}</p>
+                </div>
+                <div class="message bot-message">
+                    <span class="msg-label">🤖 AI</span>
+                    <p>{{ msg.bot_response }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="chat-placeholder">
+                <p>👋 Start a conversation! Ask me to explain a topic or answer a question.</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Typing indicator -->
+    <div id="typingIndicator" class="typing-indicator" style="display:none;">
+        🤖 AI is thinking...
+    </div>
+
+    <!-- Chat input area -->
+    <div class="chat-input-area">
+        <input
+            type="text"
+            id="chatInput"
+            placeholder="Type your message here..."
+            autocomplete="off"
+        />
+        <button onclick="sendMessage()" class="btn btn-primary" id="sendBtn">Send</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Scroll chat to the bottom on load
+    const chatBox = document.getElementById('chatBox');
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Send message to chatbot API
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        // Add user's message to chat window immediately
+        addMessage('You', message, 'user-message');
+        input.value = '';
+
+        // Show typing indicator
+        document.getElementById('typingIndicator').style.display = 'block';
+        document.getElementById('sendBtn').disabled = true;
+
+        // Send message to Django API
+        fetch('/api/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('sendBtn').disabled = false;
+
+            const reply = data.response || data.error || 'No response received.';
+            addMessage('🤖 AI', reply, 'bot-message');
+        })
+        .catch(error => {
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('sendBtn').disabled = false;
+            addMessage('⚠️ Error', error.message, 'bot-message error');
+        });
+    }
+
+    // Helper: Add a message bubble to the chat box
+    function addMessage(sender, text, cssClass) {
+        const chatBox = document.getElementById('chatBox');
+
+        // Remove placeholder if it exists
+        const placeholder = chatBox.querySelector('.chat-placeholder');
+        if (placeholder) placeholder.remove();
+
+        const div = document.createElement('div');
+        div.className = 'message ' + cssClass;
+        div.innerHTML = `<span class="msg-label">${sender}</span><p>${text}</p>`;
+        chatBox.appendChild(div);
+
+        // Auto-scroll to the latest message
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Press Enter to send
+    document.getElementById('chatInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+{% endblock %}
